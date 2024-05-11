@@ -4,12 +4,18 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.labexam4.Adapter.ToDoAdapter
 import com.example.labexam4.R
+import android.os.VibrationEffect
+import android.os.Vibrator
+import androidx.annotation.RequiresApi
+import androidx.core.content.getSystemService
 
 class RecyclerItemTouchHelper(
     private val adapter: ToDoAdapter
@@ -19,26 +25,25 @@ class RecyclerItemTouchHelper(
         return false
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-
-        var position:Int =viewHolder.adapterPosition
-        if(direction == ItemTouchHelper.LEFT){
-            var builder:AlertDialog.Builder  = AlertDialog.Builder(adapter.getContext())
+        val position = viewHolder.adapterPosition
+        val context = adapter.getContext()
+        if (direction == ItemTouchHelper.LEFT) {
+            val builder = AlertDialog.Builder(context)
             builder.setTitle("Delete Task")
             builder.setMessage("Are you sure you want to delete this task?")
-            builder.setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, which ->
-
+            builder.setPositiveButton("Confirm") { dialog, _ ->
                 adapter.deleteItem(position)
-            })
-            builder.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
-
-                adapter.notifyItemChanged(viewHolder.adapterPosition)
-            })
-
-            val dialog: AlertDialog = builder.create()
+                context.getSystemService<Vibrator>()?.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            }
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                adapter.notifyItemChanged(position)
+            }
+            val dialog = builder.create()
+            dialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
             dialog.show()
-        }
-        else{
+        } else {
             adapter.editItem(position)
         }
     }
@@ -53,45 +58,39 @@ class RecyclerItemTouchHelper(
         isCurrentlyActive: Boolean
     ) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-        var icon:Drawable
-        var background: ColorDrawable
 
-        var itemView: View = viewHolder.itemView
-        var backgroundCornerOffSet:Int = 20
-        if(dX > 0){
+        val itemView = viewHolder.itemView
+        val icon: Drawable
+        val background: ColorDrawable
+        val backgroundCornerOffset = 20
+        val iconMargin = (itemView.height - ContextCompat.getDrawable(adapter.getContext(), R.drawable.edit)!!.intrinsicHeight) / 2
+
+        if (dX > 0) { // Swipe right
             icon = ContextCompat.getDrawable(adapter.getContext(), R.drawable.edit)!!
             background = ColorDrawable(Color.GREEN)
-        }
-        else{
+        } else { // Swipe left
             icon = ContextCompat.getDrawable(adapter.getContext(), R.drawable.delete)!!
             background = ColorDrawable(Color.RED)
-
         }
 
-        val iconMargin:Int = itemView.height - icon.intrinsicHeight / 2
-        val iconTop:Int = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
-        var iconBottom:Int = iconTop + icon.intrinsicHeight
+        val iconTop = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
+        val iconBottom = iconTop + icon.intrinsicHeight
 
-        if(dX > 0 ){
-            val iconLeft :Int = itemView.left + iconMargin
-            val iconRight:Int = itemView.left + iconMargin + icon.intrinsicHeight
-            icon.setBounds(iconLeft,iconTop,iconRight,iconBottom)
-
-            background.setBounds(itemView.left, itemView.top, itemView.left + dX.toInt() + backgroundCornerOffSet, itemView.bottom)
+        if (dX > 0) { // Right swipe
+            val iconLeft = itemView.left + iconMargin
+            val iconRight = itemView.left + iconMargin + icon.intrinsicWidth
+            icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+            background.setBounds(itemView.left, itemView.top, itemView.left + dX.toInt() + backgroundCornerOffset, itemView.bottom)
+        } else if (dX < 0) { // Left swipe
+            val iconLeft = itemView.right - iconMargin - icon.intrinsicWidth
+            val iconRight = itemView.right - iconMargin
+            icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+            background.setBounds(itemView.right + dX.toInt() - backgroundCornerOffset, itemView.top, itemView.right, itemView.bottom)
+        } else {
+            background.setBounds(0, 0, 0, 0)
         }
 
-        else if (dX < 0){
-            val iconLeft :Int = itemView.right + iconMargin - icon.intrinsicWidth
-            val iconRight:Int = itemView.right - iconMargin
-            icon.setBounds(iconLeft,iconTop,iconRight,iconBottom)
-
-            background.setBounds(itemView.right + dX.toInt() - backgroundCornerOffSet, itemView.top, itemView.right , itemView.bottom)
-        }
-        else{
-            background.setBounds(0,0,0,0)
-        }
-        background.draw(c);
-        icon.draw(c);
+        background.draw(c)
+        icon.draw(c)
     }
-
 }
