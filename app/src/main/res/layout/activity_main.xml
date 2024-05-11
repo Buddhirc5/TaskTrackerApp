@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/teal_700">
+
+    <!-- Enhanced TextView with shadow and new style -->
+    <TextView
+        android:id="@+id/tasksText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:background="@drawable/rounded_corner"
+        android:text="@string/heading"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:shadowColor="@color/black"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="3"/>
+
+    <!-- Stylish RecyclerView with subtle background and elevation for depth -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/taskRecycleView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/tasksText"
+        android:layout_above="@id/fab"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/recycler_view_background"
+    android:elevation="4dp"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    android:nestedScrollingEnabled="false"/>
+
+    <!-- Floating Action Button with enhanced style -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="32dp"
+        app:srcCompat="@drawable/add"
+        app:backgroundTint="@color/teal_200"
+        app:rippleColor="@color/white"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp"/>
+
+</RelativeLayout>

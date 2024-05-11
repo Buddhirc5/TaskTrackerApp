@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Task Tracker</string>
+    <string name="heading">Tasks</string>
+    <string name="saveButton">Save</string>
+</resources>
